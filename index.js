@@ -1,86 +1,108 @@
-console.log("Hello")
-//I think most of this code is good, but I cannot for the life of me get the data to populate from the API...
 
 const cohortName = "2404-ftb-mt-web-pt"
 const API_URL = `https://fsa-crud-2aa9294fe819.herokuapp.com/api/${cohortName}`;
 
-const fetchAllEvents = async () => {
-    try {
-    const response = await fetch(API_URL + "/events");
-    const result = await response.json();
-    console.log(result)
-    return result.data
-    
-    } catch (err) {
-    console.error("Uh oh, trouble fetching events!", err);
- }
-}
+const state = {
+    events: [], 
+};
 
-const fetchOneEvent = async (eventID) => {
-    try {
-    const response = await fetch(`${API_URL}/${cohortName}/${eventID}`);
-    const result = await response.json();
-    console.log(result)
-    return result.data
-} catch(err){
-    console.error("Uh oh, trouble fetching event")
-}
-}
+const eventList = document.querySelector('#events')
+const addEvent = document.querySelector('#addEvent')
+addPartyButton = addEventListener('submit', createEvent)
 
-const renderAllEvents = (eventList) => {
-    console.log(eventList)
-    const holders = []
-    for(let i = 0; i<eventList.length; i++){
-      const eventHolder = document.createElement("div")
-  
-      const nameEl = document.createElement("h2")
-      const descripEl = document.createElement("p")
-      const viewButton = document.createElement("button")
-      const deleteButton = document.createElement("button")
-      
-      viewButton.textContent = "View Description"
-      deleteButton.textContent = "Delete this event"
-      
-      nameEl.textContent = eventList[i].name
-      descripEl.textContent = eventList[i].id
-  
-      viewButton.addEventListener("click", async (e) => {
-        const singleEvent = await fetchSinglePlayer(eventList[i].id)
-        const singleEventHolder = document.createElement("div")
-  
-        const singleName = document.createElement("h2")
-        const singleDescrip = document.createElement("p")
-  
-        singleName.textContent = singleEvent.name
-        singleDescrip.textContent = singleDescrip.description
-  
-        singleEventHolder.append(singleName, singleDescrip)
-        const body = document.getElementsByTagName("body")[0]
-        body.append(singleEventHolder)
-      })
-  
-      deleteButton.addEventListener("click", (e) => {
-        removeEvent(eventList[i].id)
-      })
-      eventHolder.append(nameEl, descripEl, viewButton, deleteButton)
-      holders.push(eventHolder)
-  
-    };
-    eventContainer.replaceChildren(...holders)
-  
-  };
-  
-  const removeEvent = async (eventID) => {
+fetchAllEvents = async () => {
     try {
-      const response = await fetch(`${API_URL}/${eventID}`,{
-        method: "DELETE",
-      });
-      const result = await response.json()
-      const players = await fetchAllEvents();
-
-      renderAllEvents(events);
-    } catch (err) {
-      console.error(err);
+        const response = await fetch(API_URL + '/events');
+        const result = await response.json()
+        return state.events = result.data
+    } catch (error) {
+        console.log('error fetching events')
     }
-  };
-  
+}
+console.log(state)
+
+async function createEvent(event) {
+    event.preventDefault()
+
+    const name = addEvent.title.value
+    const date = new Date(addEvent.dateTime.value)
+    const description = addEvent.description.value
+    const location = addEvent.location.value
+
+    try {
+        const response = await fetch(API_URL + '/events', {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                name,
+                date,
+                description,
+                location,
+            })
+        })
+        const result = await response.json()
+    } catch (error) {
+        console.log('error posting event')
+    }
+}
+
+async function deleteEvent(id) {
+    try {
+        const response = await fetch (`${API_URL + '/events'}/${id}`, {
+            method: "DELETE",
+            headers: {'Content-Type': 'application/json',
+            },
+        })
+        const result = await response.json()
+        return state.events = result.data
+    }catch(error) {
+        console.log('error deleting event')
+    }
+}
+
+function renderEvents() {
+    if (state.events.length < 1) {
+        const newEventItem = document.createElement('li')
+        newEventItem.textContent = 'No Event Found'
+        eventList.append(newEventItem)
+    }else {
+        eventList.replaceChildren()
+        state.events.forEach((eventObject) => {
+            const newEventItem = document.createElement('li')
+            newEventItem.classList.add('#events')
+
+            const newTitle = document.createElement('h2')
+            newTitle.textContent = eventObject.name
+
+            const newDate = document.createElement('p')
+            newDate.textContent = eventObject.date
+
+            const newDescription = document.createElement('p')
+            newDescription.textContent = eventObject.description
+
+            const newLocation = document.createElement('p')
+            newLocation.textContent = eventObject.location
+
+            const deleteButton = document.createElement('button')
+            deleteButton.textContent = 'delete'
+            deleteButton.addEventListener('click', () => 
+                deleteEvent(eventObject.id))
+
+            newEventItem.append(
+                newTitle,
+                newDate,
+                newDescription,
+                newLocation,
+                deleteButton
+            )
+
+            eventList.append(newEventItem)
+        })
+    }
+}
+
+async function renderAll() {
+    await fetchAllEvents();
+    renderEvents()
+}
+renderAll()

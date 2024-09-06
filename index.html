@@ -4,12 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Party Planner</title>
-
-    <link rel="stylesheet" href="styles.css">
+    <script defer src = 'index.js'></script>
+    <link rel = 'stylesheet' href = 'styles.css'>
 </head>
 <body>
     <h1>Party Planner</h1>
-
-    <script src="index.js"></script>
+    <div>
+        <form id="addEvent">
+            <label>Party Name: 
+                <input type="text" name="title" />
+            </label>
+            <br />
+            <label>Event Date and Time: 
+                <input type="datetime-local" name="dateTime" />
+            </label>
+            <br />
+            <label>Description: 
+                <input type="text" name="description" />
+            </label>
+            <br />
+            <label>Location: 
+                <input type="text" name="location" />
+            </label>
+            <br />
+            <button>Add Party</button>
+        </form>
+    </div>
+    <div>
+        <ul id="events"></ul>
+    </div>
+    
 </body>
 </html>
